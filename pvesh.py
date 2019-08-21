@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 ANSIBLE_METADATA = {
-    'metadata_version': '1.0',
-    'status': ['stableinterface'],
+    'metadata_version': '0.2',
+    'status': ['preview'],
     'supported_by': 'godspeed-you'
 }
 
