@@ -38,7 +38,8 @@ def execute_pvesh(handler, api_path, **params):
         try: # Sometimes pvesh is very kind and provides already a status code
             return dict(status=int(stderr[:4]),
                         stderr_message=stderr[:4],
-                        result=result)
+                        result=result,
+                        command=command)
         except ValueError:
             status = 512
 
@@ -53,7 +54,8 @@ def execute_pvesh(handler, api_path, **params):
 
         return dict(status=status,
                     stderr_message=stderr,
-                    result=result)
+                    result=result,
+                    command=command)
 
 
     if handler in ['set', 'create', 'delete']:
@@ -71,7 +73,8 @@ def execute_pvesh(handler, api_path, **params):
 
     return dict(status=status,
                 stderr_message='',
-                result=result)
+                result=result,
+                command=command)
 
 
 def map_status(status, command):
@@ -93,6 +96,7 @@ def main():
         path=dict(type='str',
                   required=True),
         options=dict(type='dict',
+                     default={},
                      required=False),
         )
 
@@ -101,24 +105,30 @@ def main():
         supports_check_mode=True)
 
     handler = ansible.params['handler']
+    path = ansible.params['path']
+    options = ansible.params['options']
 
-    result = execute_pvesh(handler,
-                           ansible.params['path'],
-                           **ansible.params['options'])
+    result = execute_pvesh(handler, path, **options)
+    status = result['status']
+    command = result['command']
+    result_final = result['result']
 
-    check_status = map_status(result['status'], handler)
+    check_status = map_status(status, handler)
     if check_status == 'ok':
         changed = False
     elif check_status == 'changed':
         changed = True
     elif check_status == 'failed':
         ansible.fail_json(msg=result.get('stderr_message'),
-                          status=result.get('status'),
-                          result=result['result'])
+                          status=status,
+                          result=result_final,
+                          command=' '.join(command))
 
     ansible_result = dict(
+        status=status,
         changed=changed,
-        result=result,)
+        result=result_final,
+        command=' '.join(command))
 
     ansible.exit_json(**ansible_result)
 
