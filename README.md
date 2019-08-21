@@ -22,7 +22,7 @@ The module tries to be as simple as possible. The mandatory keys are the `comman
 
 ### ToDo
 
-* Add ansible specific meta data in module
 * Add `state` as key
 * Validate if an item exists before trying to add/modify it
+* Extend ansible specific meta data in module
 * ???
